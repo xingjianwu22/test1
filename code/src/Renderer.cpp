@@ -35,9 +35,9 @@ void Renderer::Render(const Scene& scene)
             for(int k = 0; k < spp; k++)
             {
                 Ray ray(eye_pos, dir);
-                framebuffer[m++] += scene.castRay(ray, 0) / spp;
+                framebuffer[m] += scene.castRay(ray, 0) / spp;
             }
-
+            m++;
         }
         UpdateProgress(j / (float)scene.height);
     }
