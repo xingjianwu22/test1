@@ -20,7 +20,7 @@ void Renderer::Render(const Scene& scene)
 
     float scale = tan(deg2rad(scene.fov * 0.5));
     float imageAspectRatio = scene.width / (float)scene.height;
-    Vector3f eye_pos(-1, 5, 10);
+    Vector3f eye_pos(278, 273, -800);
     int m = 0;
 
     // change the spp value to change sample ammount

@@ -23,11 +23,11 @@ public:
     Vector3f Ks;           // 镜面反射系数，控制材料的镜面反射光的强度
     float ior;             // 折射率
 
-    explicit Material(MaterialType t = DIFFUSE_AND_GLOSSY, const Vector3f &d_color = Vector3f::ZERO, const Vector3f &s_color = Vector3f::ZERO, float s = 0) :
-            m_type(t), diffuseColor(d_color), specularColor(s_color), shininess(s) {
+    // explicit Material(MaterialType t = DIFFUSE_AND_GLOSSY, const Vector3f &d_color = Vector3f::ZERO, const Vector3f &s_color = Vector3f::ZERO, float s = 0) :
+    //         m_type(t), diffuseColor(d_color), specularColor(s_color), shininess(s) {
 
-    }
-
+    // }
+    Material(MaterialType t = DIFFUSE, Vector3f e = Vector3f::ZERO) : m_type(t), m_emission(e) {}
     virtual ~Material() = default;
 
     virtual Vector3f getDiffuseColor() const {
@@ -37,7 +37,7 @@ public:
     Vector3f getEmission() {return m_emission;}
     bool hasEmission()
     {
-        if(m_emission.length() > 0.00001)
+        if(m_emission.length() < 0.00001)
             return false;
         else
             return true;
