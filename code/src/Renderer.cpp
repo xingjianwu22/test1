@@ -25,17 +25,22 @@ void Renderer::Render(const Scene& scene)
 
     // change the spp value to change sample ammount
     int spp = 16;                 // spp指每个pixel会采样的次数
+    std::cout << "SPP: " << spp << "\n";
     for (uint32_t j = 0; j < scene.height; ++j) {
         for (uint32_t i = 0; i < scene.width; ++i) {
-            // generate primary ray direction
-            float x = (2 * (i + 0.5) / (float)scene.width - 1) *
-                      imageAspectRatio * scale;
-            float y = (1 - 2 * (j + 0.5) / (float)scene.height) * scale;
-            Vector3f dir = Vector3f(-x, y, 1).normalized();
-            for(int k = 0; k < spp; k++)
-            {
-                Ray ray(eye_pos, dir);
-                framebuffer[m] += scene.castRay(ray, 0) / spp;
+            for (int k = 0; k < spp; k++){
+                // 计算 step 的值
+                float step = 1.0 / sqrt(spp);
+
+                // 计算子像素中心位置
+                float x = (2 * (i + step / 2 + step * (k % (int)sqrt(spp))) / (float)scene.width - 1) * imageAspectRatio * scale;
+                float y = (1 - 2 * (j + step / 2 + step * (k / (int)sqrt(spp))) / (float)scene.height) * scale;
+
+                // 计算光线方向
+                Vector3f dir = Vector3f(-x, y, 1).normalized();
+
+                // 发射光线并累加颜色值
+                framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;  
             }
             m++;
         }

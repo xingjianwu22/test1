@@ -48,7 +48,7 @@ BVHBuildNode* BVHAccel::recursiveBuild(std::vector<Object3D*> objects)
     else if (objects.size() == 2) {
         node->left = recursiveBuild(std::vector<Object3D*>{objects[0]});
         node->right = recursiveBuild(std::vector<Object3D*>{objects[1]});
-
+        node->area = node->left->area + node->right->area;
         node->bounds = Union(node->left->bounds, node->right->bounds);
         return node;
     }

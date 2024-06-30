@@ -14,7 +14,7 @@ public:
     Vector3f center;
     float radius, radius2;
     float area;
-    Sphere() : radius(1), radius2(2), center(0, 0, 0) {
+    Sphere() : radius(1), radius2(1), center(0, 0, 0) {
         // unit ball at the center
     }
 
@@ -24,7 +24,7 @@ public:
         this->radius = radius;
         this->radius2 = radius * radius;
         this->m = material;
-        this->area = 4 * M_PI *radius2;
+        this->area = 4 * M_PI * radius2;
     }
 
     ~Sphere() override = default;
