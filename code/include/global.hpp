@@ -31,11 +31,11 @@ inline  bool solveQuadratic(const float &a, const float &b, const float &c, floa
 inline float get_random_float()
 {
     // std::random_device 是一个随机数生成器，通常用于获取硬件生成的随机数种子。
-    std::random_device dev;
+    static std::random_device dev;
     // std::mt19937 是一种梅森旋转算法的伪随机数生成器，使用 dev() 生成的随机种子进行初始化。
-    std::mt19937 rng(dev());
+    static std::mt19937 rng(dev());
     // std::uniform_real_distribution<float> 是一个均匀分布的随机数分布器
-    std::uniform_real_distribution<float> dist(0.f, 1.f); // distribution in range [0, 1)
+    static std::uniform_real_distribution<float> dist(0.f, 1.f); // distribution in range [0, 1)
     return dist(rng);
 }
 
