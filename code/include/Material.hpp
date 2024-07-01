@@ -110,3 +110,5 @@ Vector3f Material::eval(const Vector3f &wi, const Vector3f &wo, const Vector3f &
 }
 
 #endif // MATERIAL_H
+
+

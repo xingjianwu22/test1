@@ -110,14 +110,11 @@ Intersection BVHAccel::Intersect(const Ray& ray) const
 
 Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
 {
-    //递归地检测射线 ray 是否与当前 BVH 树节点 node 及其子节点中的任何对象相交，并返回最近的相交点信息。
-    
     // TODO Traverse the BVH to find intersection
-    //递归调用Bounds3::intersectP
     Intersection res;
     // 首先判断这个ray与当前box是否有交点：
     // 1.如果没有交点 -> 那就不用继续了，因为再进行细分也没有意义，直接返回当前的intersection
-    std::array<int, 3> dirIsNeg = { int(ray.getDirection().x() > 0),int(ray.getDirection().y() > 0),int(ray.getDirection().z() > 0) };
+    std::array<int, 3> dirIsNeg = { int(ray.getDirection().x()>0),int(ray.getDirection().y() > 0),int(ray.getDirection().z() > 0) };
     if (!node->bounds.IntersectP(ray, ray.getInvDirection(), dirIsNeg)) {
         return res;
     }
@@ -150,3 +147,4 @@ void BVHAccel::Sample(Intersection &pos, float &pdf){
     getSample(root, p, pos, pdf);
     pdf /= root->area;
 }
+

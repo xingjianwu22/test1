@@ -1,7 +1,3 @@
-//
-// Created by Göksu Güvendiren on 2019-05-14.
-//
-
 #include "Scene.hpp"
 
 
@@ -205,8 +201,11 @@ void Scene::sampleLight(Intersection &pos, float &pdf) const
 
 
 // Implementation of Path Tracing
-Vector3f Scene::castRay(const Ray& ray, int depth) const
+// Implementation of Path Tracing
+Vector3f Scene::castRay(const Ray &ray, int depth) const
 {
+    // TO DO Implement Path Tracing Algorithm here
+
     //创建变量以储存直接和间接光照计算值
     Vector3f dir = { 0.0,0.0,0.0 };
     Vector3f indir = { 0.0,0.0,0.0 };
@@ -222,7 +221,6 @@ Vector3f Scene::castRay(const Ray& ray, int depth) const
             return inter.m->getEmission();
         }
         else return dir;//弹射打到光，直接返回0，0.0
- 
     }
     //3.ray打到物体：这个时候才开始进行伪代码后面的步骤
     
@@ -240,24 +238,26 @@ Vector3f Scene::castRay(const Ray& ray, int depth) const
     //光源的一些参数
     Vector3f xx = light_pos.coords;
     Vector3f NN = light_pos.normal.normalized();
-    Vector3f ws = (p - xx).normalized();//光源指向物体
+    Vector3f ws = (xx - p).normalized();//物体指向光源
     float dis = (p - xx).length();//二者距离
     float dis2 = Vector3f::dot((p - xx), (p - xx));
- 
+    
     //判断光源与物体间是否有遮挡：
-    //发出一条射线，方向为ws 光源xx -> 物体p
-    Ray light_to_obj(xx, ws);//Ray(orig,dir)
+    //发出一条射线，方向为ws 物体p -> 光源xx
+    Vector3f p_deviation = (Vector3f::dot(ray.getDirection(), N) < 0) ?
+        p + N * EPSILON :
+        p - N * EPSILON ;
+    Ray light_to_obj(p_deviation, ws);//Ray(orig,dir)
     Intersection light_to_scene = Scene::intersect(light_to_obj);
     //假如dis>light_to_scene.distance就说明有遮挡，那么反着给条件即可：
-    if (light_to_scene.isIntersected && (light_to_scene.distance - dis > -EPSILON)) {//没有遮挡
-        //为了更贴近伪代码，先设定一些参数
+    if (light_to_scene.isIntersected&& (light_to_scene.distance-dis>-sqrt(EPSILON))) {//没有遮挡
+        // 计算直接光照
         Vector3f L_i = light_pos.emit;//光强
-        Vector3f f_r = inter.m->eval(wo, -ws, N);//材质，课上说了，BRDF==材质，ws不参与计算
-        float cos_theta = Vector3f::dot(-ws, N);//物体夹角
-        float cos_theta_l = Vector3f::dot(ws, NN);//光源夹角
+        Vector3f f_r = inter.m->eval(wo, ws, N);//材质，BRDF==材质，ws不参与计算
+        float cos_theta = Vector3f::dot(ws, N);//物体夹角
+        float cos_theta_l = Vector3f::dot(-ws, NN);//光源夹角
         dir = L_i * f_r * cos_theta * cos_theta_l / dis2 / pdf_light;
     }
- 
     //3.2间接光照
     
     //俄罗斯轮盘赌
@@ -278,5 +278,6 @@ Vector3f Scene::castRay(const Ray& ray, int depth) const
             indir = castRay(r, depth + 1) * f_r * cos_theta / pdf_hemi / RussianRoulette;
         }
     }
+    //dir2 = light_pos;
     return dir + indir;
 }

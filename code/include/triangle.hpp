@@ -227,8 +227,8 @@ inline Intersection Triangle::getIntersection(Ray ray)
     if (v < 0 || u + v > 1)
         return inter;
     t_tmp = Vector3f::dot(e2, qvec) * det_inv;           //E2 * S2 / DET
-
-    // TODO find ray triangle intersection
+    if(t_tmp < 0)
+        return inter;
     inter.isIntersected = true;
     inter.coords = ray(t_tmp);
     inter.normal = normal;
