@@ -6,7 +6,7 @@
 
 inline float deg2rad(const float& deg) { return deg * M_PI / 180.0; }
 
-const float EPSILON = 0.00001;
+const float EPSILON = 0.00016;
 std::mutex mtx;
 
 // The main render function. This where we iterate over all pixels in the image,
@@ -20,7 +20,7 @@ void Renderer::Render(const Scene& scene)
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
     // change the spp value to change sample ammount
-    int spp = 32;                 // spp指每个pixel会采样的次数
+    int spp = 256;                 // spp指每个pixel会采样的次数
     std::cout << "SPP: " << spp << "\n";
     //int m = 0;
     // for (uint32_t j = 0; j < scene.height; ++j) {

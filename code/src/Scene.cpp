@@ -275,7 +275,8 @@ Vector3f Scene::castRay(const Ray &ray, int depth) const
             Vector3f f_r = inter.m->eval(wo, wi, N);//wo不参与计算
             float cos_theta = Vector3f::dot(wi, N);
             float pdf_hemi = inter.m->pdf(wo, wi, N);
-            indir = castRay(r, depth + 1) * f_r * cos_theta / pdf_hemi / RussianRoulette;
+            if(pdf_hemi > EPSILON) //防止pdf_hemi取接近0，产生白色噪点
+                indir = castRay(r, depth + 1) * f_r * cos_theta / pdf_hemi / RussianRoulette;
         }
     }
     //dir2 = light_pos;
