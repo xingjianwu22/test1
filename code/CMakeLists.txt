@@ -35,3 +35,10 @@ SET(CMAKE_CXX_STANDARD 17)
 ADD_EXECUTABLE(${PROJECT_NAME} ${PA1_SOURCES} ${PA1_INCLUDES})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} vecmath)
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PRIVATE include)
+
+
+# 找到 pthread 库
+find_package(Threads REQUIRED)
+
+# 链接 pthread 库
+target_link_libraries(PathTracing PRIVATE Threads::Threads)
