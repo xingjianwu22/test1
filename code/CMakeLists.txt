@@ -8,7 +8,6 @@ ENDIF()
 ADD_SUBDIRECTORY(deps/vecmath)
 
 SET(PA1_SOURCES
-        src/image.cpp
         src/main.cpp
         src/BVH.cpp
         src/Renderer.cpp
@@ -18,7 +17,6 @@ SET(PA1_INCLUDES
         include/Bounds3.hpp
         include/BVH.hpp
         include/global.hpp
-        include/image.hpp
         include/Intersection.hpp
         include/Light.hpp
         include/Material.hpp
