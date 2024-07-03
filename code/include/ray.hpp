@@ -4,7 +4,7 @@
 #include <cassert>
 #include <iostream>
 #include <limits>
-#include <Vector3f.h>
+#include "Vector3f.h"
 
 
 // Ray class mostly copied from Peter Shirley and Keith Morley
@@ -47,7 +47,6 @@ public:
     }
 
     
-private:
     Vector3f origin;
     Vector3f direction, direction_inv;
     double t;

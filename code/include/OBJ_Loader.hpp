@@ -231,7 +231,7 @@ namespace objl
             return (sqrtf(powf(in.X, 2) + powf(in.Y, 2) + powf(in.Z, 2)));
         }
 
-        // Vector3 DotProduct
+        // Vector3 Vector3f::dot
         float DotV3(const Vector3 a, const Vector3 b)
         {
             return (a.X * b.X) + (a.Y * b.Y) + (a.Z * b.Z);

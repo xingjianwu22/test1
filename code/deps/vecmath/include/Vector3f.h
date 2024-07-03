@@ -93,7 +93,6 @@ public:
 private:
 
 	float m_elements[ 3 ];
-
 };
 
 // component-wise operators

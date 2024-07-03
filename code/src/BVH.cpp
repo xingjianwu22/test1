@@ -147,4 +147,3 @@ void BVHAccel::Sample(Intersection &pos, float &pdf){
     getSample(root, p, pos, pdf);
     pdf /= root->area;
 }
-

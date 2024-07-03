@@ -3,10 +3,10 @@
 #include "Renderer.hpp"
 #include <mutex>
 #include <thread>
-
+#include <atomic>
 inline float deg2rad(const float& deg) { return deg * M_PI / 180.0; }
 
-const float EPSILON = 0.00016;
+const float EPSILON = 0.00001;
 std::mutex mtx;
 
 // The main render function. This where we iterate over all pixels in the image,
@@ -20,32 +20,8 @@ void Renderer::Render(const Scene& scene)
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
     // change the spp value to change sample ammount
-    int spp = 256;                 // spp指每个pixel会采样的次数
+    int spp = 4;                 // spp指每个pixel会采样的次数
     std::cout << "SPP: " << spp << "\n";
-    //int m = 0;
-    // for (uint32_t j = 0; j < scene.height; ++j) {
-        // for (uint32_t i = 0; i < scene.width; ++i) {
-        //     for (int k = 0; k < spp; k++) {
-        //         // 超采样抗锯齿（SSAA） 随机超采样（Random Sampling SSAA）
-        //         // 生成随机偏差 [-0.5, 0.5]
-        //         float offset_x = ((rand() / (float)RAND_MAX) - 0.5f);
-        //         float offset_y = ((rand() / (float)RAND_MAX) - 0.5f);
-
-        //         // 计算子像素位置
-        //         float x = (2 * (i + 0.5f + offset_x) / (float)scene.width - 1) * imageAspectRatio * scale;
-        //         float y = (1 - 2 * (j + 0.5f + offset_y) / (float)scene.height) * scale;
-
-        //         // 计算光线方向
-        //         Vector3f dir = Vector3f(-x, y, 1).normalized();
-
-        //         // 发射光线并累加颜色值
-        //         framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
-        //     }
-        //     m++;
-    //     }
-    //     UpdateProgress(j / (float)scene.height);
-    // }
-    // UpdateProgress(1.f);
 
     int process = 0;
     const int thred = 20;
@@ -62,12 +38,9 @@ void Renderer::Render(const Scene& scene)
                 for (int k = 0; k < spp; k++) {
                     // 超采样抗锯齿（SSAA） 随机超采样（Random Sampling SSAA）
                     // 生成随机偏差 [-0.5, 0.5]
-                    float offset_x = ((rand() / (float)RAND_MAX) - 0.5f);
-                    float offset_y = ((rand() / (float)RAND_MAX) - 0.5f);
-
                     // 计算子像素位置
-                    float x = (2 * (i + 0.5f + offset_x) / (float)scene.width - 1) * imageAspectRatio * scale;
-                    float y = (1 - 2 * (j + 0.5f + offset_y) / (float)scene.height) * scale;
+                    float x = (2 * (i + get_random_float()) / (float)scene.width - 1) * imageAspectRatio * scale;
+                    float y = (1 - 2 * (j + get_random_float()) / (float)scene.height) * scale;
 
                     // 计算光线方向
                     Vector3f dir = Vector3f(-x, y, 1).normalized();
@@ -108,3 +81,28 @@ void Renderer::Render(const Scene& scene)
     }
     fclose(fp);    
 }
+
+    // int m = 0;
+    // for (uint32_t j = 0; j < scene.height; ++j) {
+    //     for (uint32_t i = 0; i < scene.width; ++i) {
+    //         for (int k = 0; k < spp; k++) {
+    //             // 超采样抗锯齿（SSAA） 随机超采样（Random Sampling SSAA）
+    //             // 生成随机偏差 [-0.5, 0.5]
+    //             float offset_x = ((rand() / (float)RAND_MAX) - 0.5f);
+    //             float offset_y = ((rand() / (float)RAND_MAX) - 0.5f);
+
+    //             // 计算子像素位置
+    //             float x = (2 * (i + 0.5f + offset_x) / (float)scene.width - 1) * imageAspectRatio * scale;
+    //             float y = (1 - 2 * (j + 0.5f + offset_y) / (float)scene.height) * scale;
+
+    //             // 计算光线方向
+    //             Vector3f dir = Vector3f(-x, y, 1).normalized();
+
+    //             // 发射光线并累加颜色值
+    //             framebuffer[m] += scene.castRay(Ray(eye_pos, dir), 0) / spp;
+    //         }
+    //         m++;
+    //     }
+    //     UpdateProgress(j / (float)scene.height);
+    // }
+    // UpdateProgress(1.f);

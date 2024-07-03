@@ -54,3 +54,30 @@ inline void UpdateProgress(float progress)
     std::cout.flush();
 };
 
+inline double distributionGGX(const Vector3f &normal, const Vector3f &h, double rough_ness) {
+    double a2 = rough_ness * rough_ness;
+    double nDotH = std::max(Vector3f::dot(normal, h), 0.0f);
+    double nDotH2 = nDotH * nDotH;
+
+    double denom = nDotH2 * (a2 - 1.0f) + 1.0f;
+    denom = M_PI * denom * denom;
+    return a2 / denom;
+}
+
+inline double geometrySchlickGGX(double nDotV, double k) {
+    double denom = nDotV * (1.0f - k) + k;
+    return nDotV / denom;
+}
+
+inline double geometrySmith(const Vector3f &normal, const Vector3f &v, const Vector3f &l, double k) {
+    double nDotV = std::max(Vector3f::dot(normal, v), 0.0f);
+    double nDotL = std::max(Vector3f::dot(normal, l), 0.0f);
+    double ggx1 = geometrySchlickGGX(nDotV, k);
+    double ggx2 = geometrySchlickGGX(nDotL, k);
+
+    return ggx1 * ggx2;
+}
+
+inline Vector3f fresnelSchlick(double cosTheta, const Vector3f &F0) {
+    return F0 + (Vector3f(1.0f) - F0) * pow(1.0 - cosTheta, 5.0);
+}

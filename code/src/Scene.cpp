@@ -32,6 +32,92 @@ void Scene::sampleLight(Intersection &pos, float &pdf) const
     }
 }
 
+
+Vector3f Scene::castRay(const Ray &ray, int depth) const
+{
+    // TO DO Implement Path Tracing Algorithm here
+
+    //创建变量以储存直接和间接光照计算值
+    Vector3f dir = { 0.0,0.0,0.0 };
+    Vector3f indir = { 0.0,0.0,0.0 };
+    //1.判断是否有交点：光线与场景中物体相交？
+    Intersection inter = Scene::intersect(ray);
+    //如果没交点
+    if (!inter.isIntersected) {
+        return this->backgroundColor;
+    }
+    //2.ray打到光源了：说明渲染方程只用算前面的自发光项，因此直接返回材质的自发光项
+    if (inter.m->hasEmission()) {
+        if (depth == 0) {//第一次打到光
+            return inter.m->getEmission();
+        }
+        else return dir;//弹射打到光，直接返回0，0.0
+    }
+    //3.ray打到物体：这个时候才开始进行伪代码后面的步骤
+    
+    //对场景中的光源进行采样，得到采样点light_pos和pdf_light
+    Intersection light_pos;
+    float pdf_light = 0.0f;
+    sampleLight(light_pos, pdf_light);
+   
+    //3.1计算直接光照
+ 
+    //物体的一些参数
+    Vector3f p = inter.coords;
+    Vector3f N = inter.normal.normalized();
+    Vector3f wo = ray.getDirection();//物体指向场景
+    //光源的一些参数
+    Vector3f xx = light_pos.coords;
+    Vector3f NN = light_pos.normal.normalized();
+    Vector3f ws = (xx - p).normalized();//物体指向光源
+    float dis = (p - xx).length();//二者距离
+    float dis2 = Vector3f::dot((p - xx), (p - xx));
+    
+    //判断光源与物体间是否有遮挡：
+    //发出一条射线，方向为ws 物体p -> 光源xx
+    Vector3f p_deviation = (Vector3f::dot(ray.getDirection(), N) < 0) ?
+        p + N * EPSILON :
+        p - N * EPSILON ;
+    Ray light_to_obj(p_deviation, ws);//Ray(orig,dir)
+    Intersection light_to_scene = Scene::intersect(light_to_obj);
+    bool hasDirectLight = false;
+    //假如dis>light_to_scene.distance就说明有遮挡，那么反着给条件即可：
+    if (light_to_scene.isIntersected&& (light_to_scene.distance-dis>-sqrt(EPSILON))) {//没有遮挡
+        // 计算直接光照
+        Vector3f L_i = light_pos.emit;//光强
+        Vector3f f_r = inter.m->eval(ws, -wo, N);//BRDF==材质
+        float cos_theta = Vector3f::dot(ws, N);//物体夹角
+        float cos_theta_l = Vector3f::dot(-ws, NN);//光源夹角
+        dir = L_i * f_r * cos_theta * cos_theta_l / dis2 / pdf_light;
+        // due to sometimes we won't get the correct ray to reflect light in the specular surface.
+        // thus, we let the ray to choose it's own directon.
+        hasDirectLight = dir.length() > 0.1; 
+    }
+    //3.2间接光照
+    
+    //俄罗斯轮盘赌
+    //Scene.hpp中已经定义了P_RR:RussianRoulette=0.8
+    float ksi = get_random_float();//随机取[0,1]
+    if (ksi < RussianRoulette) {
+        //计算间接光照
+        
+        //随机生成一个wi方向
+        Vector3f wi = inter.m->sample(wo, N).normalized();//这里的wi其实没参与计算，返回的是一个随机的方向
+        Ray r(p, wi);
+        Intersection obj_to_scene = Scene::intersect(r);
+        //击中了物体&&物体不是光源
+        if (obj_to_scene.isIntersected && (!obj_to_scene.m->hasEmission() || !hasDirectLight)) {
+            Vector3f f_r = inter.m->eval(wi, -wo, N);
+            float cos_theta = std::max(0.0f, Vector3f::dot(wi, N));
+            float pdf_hemi = inter.m->pdf(wi, -wo, N);
+            if(pdf_hemi > EPSILON) //防止pdf_hemi取接近0，产生白色噪点
+            indir = castRay(r, depth + 1) * f_r * cos_theta / pdf_hemi / RussianRoulette;
+        }
+    }
+    return Vector3f::Max(Vector3f::Min(dir + indir, Vector3f(1.0f)), Vector3f(0.0f));
+}
+
+
 // Implementation of the Whitted-syle light transport algorithm (E [S*] (D|G) L)
 //
 // This function is the function that compute the color at the intersection point
@@ -201,84 +287,3 @@ void Scene::sampleLight(Intersection &pos, float &pdf) const
 
 
 // Implementation of Path Tracing
-// Implementation of Path Tracing
-Vector3f Scene::castRay(const Ray &ray, int depth) const
-{
-    // TO DO Implement Path Tracing Algorithm here
-
-    //创建变量以储存直接和间接光照计算值
-    Vector3f dir = { 0.0,0.0,0.0 };
-    Vector3f indir = { 0.0,0.0,0.0 };
-    //1.判断是否有交点：光线与场景中物体相交？
-    Intersection inter = Scene::intersect(ray);
-    //如果没交点
-    if (!inter.isIntersected) {
-        return dir;//return 0,0,0
-    }
-    //2.ray打到光源了：说明渲染方程只用算前面的自发光项，因此直接返回材质的自发光项
-    if (inter.m->hasEmission()) {
-        if (depth == 0) {//第一次打到光
-            return inter.m->getEmission();
-        }
-        else return dir;//弹射打到光，直接返回0，0.0
-    }
-    //3.ray打到物体：这个时候才开始进行伪代码后面的步骤
-    
-    //对场景中的光源进行采样，得到采样点light_pos和pdf_light
-    Intersection light_pos;
-    float pdf_light = 0.0f;
-    sampleLight(light_pos, pdf_light);
-   
-    //3.1计算直接光照
- 
-    //物体的一些参数
-    Vector3f p = inter.coords;
-    Vector3f N = inter.normal.normalized();
-    Vector3f wo = ray.getDirection();//物体指向场景
-    //光源的一些参数
-    Vector3f xx = light_pos.coords;
-    Vector3f NN = light_pos.normal.normalized();
-    Vector3f ws = (xx - p).normalized();//物体指向光源
-    float dis = (p - xx).length();//二者距离
-    float dis2 = Vector3f::dot((p - xx), (p - xx));
-    
-    //判断光源与物体间是否有遮挡：
-    //发出一条射线，方向为ws 物体p -> 光源xx
-    Vector3f p_deviation = (Vector3f::dot(ray.getDirection(), N) < 0) ?
-        p + N * EPSILON :
-        p - N * EPSILON ;
-    Ray light_to_obj(p_deviation, ws);//Ray(orig,dir)
-    Intersection light_to_scene = Scene::intersect(light_to_obj);
-    //假如dis>light_to_scene.distance就说明有遮挡，那么反着给条件即可：
-    if (light_to_scene.isIntersected&& (light_to_scene.distance-dis>-sqrt(EPSILON))) {//没有遮挡
-        // 计算直接光照
-        Vector3f L_i = light_pos.emit;//光强
-        Vector3f f_r = inter.m->eval(wo, ws, N);//材质，BRDF==材质，ws不参与计算
-        float cos_theta = Vector3f::dot(ws, N);//物体夹角
-        float cos_theta_l = Vector3f::dot(-ws, NN);//光源夹角
-        dir = L_i * f_r * cos_theta * cos_theta_l / dis2 / pdf_light;
-    }
-    //3.2间接光照
-    
-    //俄罗斯轮盘赌
-    //Scene.hpp中已经定义了P_RR:RussianRoulette=0.8
-    float ksi = get_random_float();//随机取[0,1]
-    if (ksi < RussianRoulette) {
-        //计算间接光照
-        
-        //随机生成一个wi方向
-        Vector3f wi = inter.m->sample(wo, N).normalized();//这里的wi其实没参与计算，返回的是一个随机的方向
-        Ray r(p, wi);
-        Intersection obj_to_scene = Scene::intersect(r);
-        //击中了物体&&物体不是光源
-        if (obj_to_scene.isIntersected && !obj_to_scene.m->hasEmission()) {
-            Vector3f f_r = inter.m->eval(wo, wi, N);//wo不参与计算
-            float cos_theta = Vector3f::dot(wi, N);
-            float pdf_hemi = inter.m->pdf(wo, wi, N);
-            if(pdf_hemi > EPSILON) //防止pdf_hemi取接近0，产生白色噪点
-                indir = castRay(r, depth + 1) * f_r * cos_theta / pdf_hemi / RussianRoulette;
-        }
-    }
-    //dir2 = light_pos;
-    return dir + indir;
-}

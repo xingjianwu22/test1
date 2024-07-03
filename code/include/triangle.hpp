@@ -70,7 +70,7 @@ public:
         //        implemented.");
     }
      // 计算并返回给定纹理坐标处的漫反射颜色
-    Vector3f evalDiffuseColor(const Vector2f&) const override;
+    //Vector3f evalDiffuseColor(const Vector2f&) const override;
     // 获取三角形的包围盒
     Bounds3 getBounds() override;
     void Sample(Intersection &pos, float &pdf){
@@ -85,6 +85,7 @@ public:
     bool hasEmit(){
         return m->hasEmission();
     }
+    Vector3f evalDiffuseColor(const Vector2f &) const;
 };
 
 class MeshTriangle : public Object3D
@@ -96,6 +97,7 @@ public:
         loader.LoadFile(filename);
         area = 0;
         m = mt;
+        std::cout<<"size = "<<loader.LoadedMeshes.size()<<std::endl;
         assert(loader.LoadedMeshes.size() == 1);
         auto mesh = loader.LoadedMeshes[0];
 
@@ -245,3 +247,4 @@ inline Vector3f Triangle::evalDiffuseColor(const Vector2f&) const
 {
     return Vector3f(0.5, 0.5, 0.5);
 }
+
