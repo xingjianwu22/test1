@@ -90,8 +90,6 @@ public:
 		return Vector3f(std::max(p1.x(), p2.x()), std::max(p1.y(), p2.y()), std::max(p1.z(), p2.z()));	
 	}
 	
-private:
-
 	float m_elements[ 3 ];
 };
 

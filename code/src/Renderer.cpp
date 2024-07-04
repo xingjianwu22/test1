@@ -20,7 +20,7 @@ void Renderer::Render(const Scene& scene)
     float imageAspectRatio = scene.width / (float)scene.height;
     Vector3f eye_pos(278, 273, -800);
     // change the spp value to change sample ammount
-    int spp = 4;                 // spp指每个pixel会采样的次数
+    int spp = 1024;                 // spp指每个pixel会采样的次数
     std::cout << "SPP: " << spp << "\n";
 
     int process = 0;

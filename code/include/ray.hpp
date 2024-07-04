@@ -21,10 +21,8 @@ public:
         t_max = std::numeric_limits<double>::max();
     }
 
-    Ray(const Ray &r) {
-        origin = r.origin;
-        direction = r.direction;
-    }
+    Ray(const Ray &r) : origin(r.origin), direction(r.direction), 
+    direction_inv(r.direction_inv), t(r.t), t_min(r.t_min), t_max(r.t_max) {}
 
     const Vector3f &getOrigin() const {
         return origin;

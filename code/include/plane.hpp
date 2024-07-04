@@ -52,5 +52,3 @@ protected:
 };
 
 #endif //PLANE_H
-		
-

@@ -114,7 +114,7 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
     Intersection res;
     // 首先判断这个ray与当前box是否有交点：
     // 1.如果没有交点 -> 那就不用继续了，因为再进行细分也没有意义，直接返回当前的intersection
-    std::array<int, 3> dirIsNeg = { int(ray.getDirection().x()>0),int(ray.getDirection().y() > 0),int(ray.getDirection().z() > 0) };
+    std::array<int, 3> dirIsNeg = { int(ray.getDirection().m_elements[0]>0),int(ray.getDirection().m_elements[1] > 0),int(ray.getDirection().m_elements[2] > 0) };
     if (!node->bounds.IntersectP(ray, ray.getInvDirection(), dirIsNeg)) {
         return res;
     }
@@ -124,9 +124,8 @@ Intersection BVHAccel::getIntersection(BVHBuildNode* node, const Ray& ray) const
         return res;
     }
     //2.1该点有子节点，则左右子节点分别判断，继续递归
-    Intersection resleft, resright;
-    resleft = getIntersection(node->left, ray);
-    resright = getIntersection(node->right, ray);
+    Intersection resleft = getIntersection(node->left, ray);
+    Intersection resright = getIntersection(node->right, ray);
     return resleft.distance < resright.distance ? resleft : resright;
 }
 
